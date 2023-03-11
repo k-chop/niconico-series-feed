@@ -88,8 +88,10 @@ const extractEntry = (element: ListElement) => {
   const link = element.url;
   const title = element.name;
   const image = element.thumbnailUrl[0];
+  const date = element.uploadDate;
+  const description = element.description;
 
-  return { link, title, image };
+  return { link, title, image, date, description };
 };
 
 const log = logging.log("niconico-series-feed");
@@ -175,10 +177,10 @@ const check = async (req: any, res: any) => {
       title: entry.title,
       id: entry.link,
       link: entry.link ?? "",
-      description: entry.link,
+      description: entry.description,
       content: entry.link,
       image: entry.image,
-      date: new Date(),
+      date: new Date(entry.date),
     });
   });
 
