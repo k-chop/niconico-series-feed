@@ -107,7 +107,7 @@ const writeLog = (
 };
 
 const check = async (req: any, res: any) => {
-  const seriesId = req?.query?.seriesId ?? "284738";
+  const seriesId = req?.query?.seriesId ?? process.env.SERIES_ID;
   if (!seriesId) {
     throw new Error(`No series id specified`);
   }
