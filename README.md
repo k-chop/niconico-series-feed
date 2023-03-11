@@ -14,7 +14,7 @@
 
 ## Debug
 
-- `pnpm dev`
+- `env SERIES_ID=123456 pnpm dev`
 
 ## Deploy
 
