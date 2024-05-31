@@ -25,29 +25,18 @@ let rootContext = opentelemetry.propagation.extract(
   {}
 );
 
-type ListElement = {
-  "@type": string;
-  position: number;
-  "@id": string;
-  name: string;
-  description: string;
-  caption: string;
-  url: string;
-  duration: string;
-  uploadDate: string;
-  embedUrl: string;
-  interactionStatistic: {}[];
-  requiresSubscription: boolean;
-  isAccessibleForFree: boolean;
-  thumbnail: { "@type": string; url: string }[];
-  thumbnailUrl: string[];
-};
+type VideoType = {
+  id: string;
+  title: string;
+  thumbnail: { url: string };
+  shortDescription: string;
+  registeredAt: string;
+}
 
-type JsonLD = {
-  "@context": string;
-  "@type": string;
-  itemListElement: ListElement[];
-};
+type VideoItemType = {
+  meta: unknown;
+  video: VideoType;
+}
 
 type InitialData = {
   state: {};
@@ -75,13 +64,7 @@ type InitialData = {
           updatedAt: string;
         };
         totalCount: number;
-        items: {
-          meta: unknown;
-          video: {
-            id: string;
-            title: string;
-          };
-        }[];
+        items: VideoItemType[];
       };
     };
   }[];
@@ -91,22 +74,18 @@ const extractCanonicalUrl = (body: CheerioAPI) => {
   return body(`link[rel="canonical"]`).attr("href");
 };
 
-const extractJsonLD = (body: CheerioAPI): JsonLD => {
-  const scriptTags = body("script");
-  const jsonDataRaw: any = scriptTags[scriptTags.length - 1].children[0];
-  return JSON.parse(jsonDataRaw.data);
-};
-
 const extractInitialAPIData = (body: CheerioAPI) => {
   return body("#js-initial-userpage-data").data("initial-data") as InitialData;
 };
 
-const extractEntry = (element: ListElement) => {
-  const link = element.url;
-  const title = element.name;
-  const image = element.thumbnailUrl[0];
-  const date = element.uploadDate;
-  const description = element.description;
+const extractEntry = (videoItem: VideoItemType) => {
+  const { video } = videoItem;
+
+  const link = `https://www.nicovideo.jp/watch/${video.id}`;
+  const title = video.title;
+  const image = video.thumbnail.url;
+  const date = video.registeredAt;
+  const description = video.shortDescription;
 
   return { link, title, image, date, description };
 };
@@ -142,7 +121,6 @@ const check = async (req: any, res: any) => {
   const parseSpan = startSpan("parse");
 
   let $ = load(body);
-  let jsonLD = extractJsonLD($);
   let initialData = extractInitialAPIData($);
   let data = initialData.nvapi[0].body.data;
   const canonicalUrl = extractCanonicalUrl($);
@@ -170,7 +148,6 @@ const check = async (req: any, res: any) => {
     $ = load(body);
     initialData = extractInitialAPIData($);
     data = initialData.nvapi[0].body.data;
-    jsonLD = extractJsonLD($);
 
     reParseSpan.end();
   }
@@ -183,7 +160,7 @@ const check = async (req: any, res: any) => {
   );
 
   // 20件分のエントリーを取得
-  const entries = jsonLD.itemListElement
+  const entries = data.items
     .reverse()
     .slice(0, 20)
     .map(extractEntry);
