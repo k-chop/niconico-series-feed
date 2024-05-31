@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.ts",
   "scripts": {
-    "dev": "ts-node --esm index.ts",
+    "dev": "tsx index.ts",
     "build": "tsc --build tsconfig.build.json"
   },
   "keywords": [],
@@ -14,7 +14,7 @@
   "devDependencies": {
     "@types/node": "^20.12.13",
     "prettier": "^3.2.5",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.11.0",
     "typescript": "^5.4.5"
   },
   "dependencies": {
