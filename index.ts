@@ -237,7 +237,7 @@ export const scrape = async (req: any, res: any) => {
   rootContext = opentelemetry.propagation.extract(
     opentelemetry.context.active(),
     {
-      traceparent: req.headers.traceparent,
+      traceparent: req?.headers?.traceparent,
     }
   );
 
